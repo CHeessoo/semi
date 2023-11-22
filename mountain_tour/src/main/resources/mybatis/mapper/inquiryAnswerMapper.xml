@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mountaintour.mountain.dao.InquiryAnswerMapper">
+
+  <resultMap type="InquiryAnswerDto" id="InquiryAnswerMap">
+    <id      column="ANSWER_NO"      property="answerNo"/>
+    <result  column="CONTENTS"       property="contents"/>
+    <result  column="CREATED_AT"     property="createdAt"/>
+    <result  column="MODIFIED_AT"    property="modifiedAt"/>
+    <association javaType="InquiryDto"     property="inquiryDto">
+      <id        column="INQUIRY_NO"       property="inquiryNo" />
+      <result    column="INQUIRY_TITLE"    property="inquiryTitle"/>
+      <result    column="INQUIRY_CONTENTS" property="inauiryContents"/>
+      <result    column="IP"               property="ip"/>
+      <result    column="CREATED_AT"       property="createdAt"/>
+    </association>
+    <association javaType="UserDto"      property="userDto">
+      <id        column="USER_NO"        property="userNo" />
+      <result    column="EMAIL"          property="email"/>
+      <result    column="PW"             property="pw"/>
+      <result    column="NAME"           property="name"/>
+      <result    column="GENDER"         property="gender"/>
+      <result    column="MOBILE"         property="mobile"/>
+      <result    column="POSTCODE"       property="postcode"/>
+      <result    column="ROAD_ADDRESS"   property="roadAddress"/>
+      <result    column="JIBUN_ADDRESS"  property="jibunAddress"/>
+      <result    column="DETAIL_ADDRESS" property="detailAddress"/>
+      <result    column="AGREE"          property="agree"/>
+      <result    column="STATE"          property="state"/>
+      <result    column="AUTH"           property="auth"/>
+      <result    column="PW_MODIFIED_AT" property="pwModifiedAt"/>
+      <result    column="JOINED_AT"      property="joinedAt"/>
+    </association>
+  </resultMap>
+  
+    <!-- 답변 등록 -->
+  <insert id="insertAnswer" parameterType="InquiryAnswerDto">
+    INSERT INTO INQUIRY_ANSWER_T (
+        ANSWER_NO
+      , INQUIRY_NO
+      , USER_NO
+      , CONTENTS
+      , CREATED_AT
+    ) VALUES (
+        ANSWER_SEQ.NEXTVAL
+      , #{inquiryDto.inquiryNo}
+      , #{userDto.userNo}
+      , #{contents}
+      , SYSDATE
+    )
+  </insert>
+  
+  <!-- 답변 상세 -->
+  <select id="getAnswer" parameterType="int" resultMap="InquiryAnswerMap">
+    SELECT AN.ANSWER_NO, AN.CONTENTS, AN.CREATED_AT, AN.MODIFIED_AT, INQ.INQUIRY_NO, U.USER_NO
+      FROM INQUIRY_ANSWER_T AN RIGHT OUTER JOIN INQUIRY_T INQ
+        ON INQ.INQUIRY_NO = AN.INQUIRY_NO LEFT OUTER JOIN USER_T U
+        ON AN.USER_NO = U.USER_NO
+     WHERE INQ.INQUIRY_NO = #{inquiryNo}
+  </select>
+  
+  <!-- 답변 수정 -->
+  <update id="updateAnswer" parameterType="InquiryAnswerDto">
+    UPDATE INQUIRY_ANSWER_T
+       SET CONTENTS = #{contents}
+         , USER_NO = #{userDto.userNo}
+         , MODIFIED_AT = SYSDATE
+     WHERE ANSWER_NO = #{answerNo}
+  </update>
+
+  
+  <!-- 답변 삭제 -->
+  <delete id="deleteAnswer" parameterType="int">
+    DELETE 
+      FROM INQUIRY_ANSWER_T
+     WHERE ANSWER_NO = #{answerNo}
+  </delete>
+	 
+
+</mapper>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mountaintour.mountain.dao.UserMapper">
+	
+	
+	
+	<resultMap type="HeartDto"  id="HeartResultMap">
+	  <result  column="USER_NO" property="userNo"/>
+    <association javaType="ProductDto"  property="productDto">
+        <id      column="PRODUCT_NO"    property="productNo"/>
+        <result  column="TRIP_NAME"     property="tripName"/>
+        <result  column="TRIP_CONTENTS" property="tripContents"/>
+        <result  column="GUIDE"         property="guide"/>
+        <result  column="TIMETAKEN"     property="timetaken"/>
+        <result  column="PRICE"         property="price"/>
+        <result  column="DANGER"        property="danger"/>
+        <result  column="REGISTERED_AT" property="registeredAt"/>
+        <result  column="MODIFIED_DATE" property="modifiedDate"/>
+        <result  column="PEOPLE"        property="people"/>
+        <result  column="HIT"           property="hit"/>
+        <result  column="PLAN"          property="plan"/>
+        <result  column="TERM_USE"      property="termUse"/>
+    </association>
+</resultMap>
+	  <select id="getUser" parameterType="Map" resultType="UserDto">
+    SELECT USER_NO, EMAIL, PW, NAME, GENDER, MOBILE, POSTCODE, ROAD_ADDRESS, JIBUN_ADDRESS, DETAIL_ADDRESS, AGREE, STATE, AUTH, PW_MODIFIED_AT, JOINED_AT
+      FROM USER_T
+    <where>
+      <if test="email != null">EMAIL = #{email}</if>
+      <if test="pw != null">AND PW = #{pw}</if>
+      <if test="userNo != null">AND USER_NO = #{userNo}</if>
+    </where>
+  </select>
+
+	<insert id="insertAccess" parameterType="String">
+	INSERT INTO ACCESS_T (
+		EMAIL
+	  , LOGIN_AT
+	  ) VALUES (
+	  	#{email}
+	  , SYSDATE
+	  )
+	</insert>
+ 	
+ 
+
+	<insert id="insertUser" parameterType="UserDto">
+	 INSERT INTO USER_T (
+        USER_NO
+      , EMAIL
+      , PW
+      , NAME
+      , GENDER
+      , MOBILE
+      , POSTCODE
+      , ROAD_ADDRESS
+      , JIBUN_ADDRESS
+      , DETAIL_ADDRESS
+      , AGREE
+      , STATE
+      , AUTH
+      , PW_MODIFIED_AT
+      , JOINED_AT
+    ) VALUES (
+        USER_SEQ.NEXTVAL
+      , #{email}
+      , #{pw}
+      , #{name}
+      , #{gender}
+      , #{mobile}
+      , #{postcode}
+      , #{roadAddress}
+      , #{jibunAddress}
+      , #{detailAddress}
+      , #{agree}
+      , 0
+      , 1
+      , SYSDATE
+      , SYSDATE
+    )
+  </insert>
+  
+   <update id="updateUser" parameterType="UserDto">
+    UPDATE USER_T
+       SET NAME = #{name}
+         , GENDER = #{gender}
+         , MOBILE = #{mobile}
+         , POSTCODE = #{postcode}
+         , ROAD_ADDRESS = #{roadAddress}
+         , JIBUN_ADDRESS = #{jibunAddress}
+         , DETAIL_ADDRESS = #{detailAddress}
+         , AGREE = #{agree}
+     WHERE USER_NO = #{userNo}
+  </update>
+
+  <update id="updateUserPw" parameterType="UserDto">
+    UPDATE USER_T
+       SET PW = #{pw}
+         , PW_MODIFIED_AT = SYSDATE
+     WHERE USER_NO = #{userNo}
+  </update>
+  
+   <delete id="deleteUser" parameterType="UserDto">
+    DELETE
+      FROM USER_T
+     WHERE USER_NO = #{userNo}
+  </delete>
+  
+    <insert id="insertNaverUser" parameterType="UserDto">
+    INSERT INTO USER_T (
+        USER_NO
+      , EMAIL
+      , NAME
+      , GENDER
+      , MOBILE
+      , AGREE
+      , STATE
+      , AUTH
+      , PW_MODIFIED_AT
+      , JOINED_AT
+    ) VALUES (
+        USER_SEQ.NEXTVAL
+      , #{email}
+      , #{name}
+      , #{gender}
+      , #{mobile}
+      , #{agree}
+      , 1
+      , 1
+      , SYSDATE
+      , SYSDATE
+    )
+  </insert>
+  <select id="selectHeartList" parameterType="Map" resultType="productDto">
+      SELECT  A.PRODUCT_NO, A.TRIP_NAME, A.TRIP_CONTENTS, A.GUIDE, A.PRICE
+        FROM (SELECT ROW_NUMBER() OVER(ORDER BY H.USER_NO DESC) AS RN, H.USER_NO, H.PRODUCT_NO, P.TRIP_NAME, P.TRIP_CONTENTS, P.PRICE, P.GUIDE
+                FROM HEART_T H INNER JOIN PRODUCT_T P
+                  ON H.PRODUCT_NO = P.PRODUCT_NO
+               WHERE H.USER_NO = #{userNo}) A
+       WHERE A.RN BETWEEN #{begin} AND #{end}
+       
+  </select>
+  
+  <select id="getHeartCount" parameterType="int" resultType="int">
+  SELECT COUNT(*)
+    FROM HEART_T
+   WHERE USER_NO = #{userNo}
+  </select>
+
+ <select id="getFindId" parameterType="Map" resultType="UserDto">
+  SELECT USER_NO, EMAIL, PW, NAME, GENDER, MOBILE, POSTCODE, ROAD_ADDRESS, JIBUN_ADDRESS, DETAIL_ADDRESS, AGREE, STATE, AUTH, PW_MODIFIED_AT, JOINED_AT
+      FROM USER_T
+     WHERE NAME = #{name} AND MOBILE = #{mobile}
+ </select>
+
+
+</mapper>

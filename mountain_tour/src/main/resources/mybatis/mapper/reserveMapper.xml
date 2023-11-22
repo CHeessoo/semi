@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mountaintour.mountain.dao.ReserveMapper">
+  
+    <resultMap type="ProductDto"  id="ProductMap">
+    <id      column="PRODUCT_NO"      property="productNo"/>
+    <result  column="TRIP_NAME"       property="tripName"/>
+    <result  column="TRIP_CONTENTS"   property="tripContents"/>
+    <result  column="GUIDE"       property="guide"/>
+    <result  column="TIMETAKEN"     property="timetaken"/>
+    <result  column="PRICE"       property="price"/>
+    <result  column="DANGER"      property="danger"/>
+    <result  column="REGISTERED_AT"   property="registeredAt"/>
+    <result  column="MODIFIED_DATE"   property="modifiedDate"/>
+    <result  column="PEOPLE"      property="people"/>
+    <result  column="HIT"           property="hit"/>
+    <result  column="PLAN"          property="plan"/>
+    <result  column="TERM_USE"      property="termUse"/>
+    <association javaType="MountainDto"      property="mountainDto">
+      <id        column="MOUNTAIN_NO"        property="mountainNo"/>
+      <result    column="MOUNTAIN_NAME"      property="mountainName"/>
+      <result    column="IMPORMATION"        property="impormation" />
+      <result    column="LOCATION"           property="location" />
+    </association>
+    <association javaType="ImageDto"         property="imageDto">
+        <result  column="IMAGE_PATH"     property="imagePath" />
+        <result  column="FILESYSTEM_NAME"    property="filesystemName"/>
+        <result  column="THUMBNAIL"      property="thumbnail"/>  
+    </association>
+    <association javaType="UserDto" property="userDto">
+        <id column="USER_NO" property="userNo"/>
+        <result column="EMAIL" property="email"/>
+        <result column="PW" property="pw"/>
+        <result column="NAME" property="name"/>
+        <result column="GENDER" property="gender"/>
+        <result column="MOBILE" property="mobile"/>
+        <result column="POSTCODE" property="postcode"/>
+        <result column="ROAD_ADDRESS" property="roadAddress"/>
+        <result column="JIBUN_ADDRESS" property="jibunAddress"/>
+        <result column="DETAIL_ADDRESS" property="detailAddress"/>
+        <result column="AGREE" property="agree"/>
+        <result column="STATE" property="state"/>
+        <result column="AUTH" property="auth"/>
+        <result column="PW_MODIFIED_AT" property="pwModifiedAt"/>
+        <result column="JOINED_AT" property="joinedAt"/>
+    </association>
+  </resultMap>
+  
+  <resultMap type="PaymentDto" id="PaymentMap">
+    <id column="PAYMENT_NO" property="paymentNo"/>
+    <result column="PAY_YN" property="payYn"/>
+    <result column="PAY_KIND" property="payKind"/>
+    <result column="PAY_BANK" property="payBank"/>
+    <result column="PAY_APPROVAL" property="payApproval"/>
+    <result column="PAY_DATE" property="payDate"/>
+    <association property="reserveDto" resultMap="ReserveMap"/>
+  </resultMap>
+  
+  <resultMap type="TouristDto" id="TouristMap">
+    <id column="TOURIST_NO" property="touristNo"/>
+    <result column="NAME" property="name"/> 
+    <result column="BIRTH_DATE" property="birthDate"/> 
+    <result column="GENDER" property="gender"/> 
+    <result column="CONTACT" property="contact"/> 
+    <result column="AGE_CASE" property="ageCase"/> 
+    <association property="reserveDto" resultMap="ReserveMap"/>
+  </resultMap>
+   
+  <resultMap type="ReserveDto" id="ReserveMap">
+    <id column="RESERVE_NO" property="reserveNo"/>
+    <result column="RESERVE_DATE" property="reserveDate"/>
+    <result column="REQUEST" property="request"/>
+    <result column="AGREE" property="agree"/>
+    <result column="PICKUP_LOC" property="pickupLoc"/>
+    <result column="RESERVE_STATUS" property="reserveStatus"/>
+    <result column="RESERVE_START" property="reserveStart"/>
+    <result column="RESERVE_PERSON" property="reservePerson"/>
+    <association javaType="UserDto" property="userDto">
+      <id column="USER_NO" property="userNo"/>
+      <result column="EMAIL" property="email" />
+      <result column="PW" property="pw" />
+      <result column="NAME" property="name" />
+      <result column="GENDER" property="gender" />
+      <result column="MOBILE" property="mobile" />
+      <result column="POSTCODE" property="postcode" />
+      <result column="ROAD_ADDRESS" property="roadAddress" />
+      <result column="JIBUN_ADDRESS" property="jibunAddress" />
+      <result column="DETAIL_ADDRESS" property="detailAddress" />
+      <result column="AGREE" property="agree" />
+      <result column="STATE" property="state" />
+      <result column="AUTH" property="auth" />
+      <result column="PW_MODIFIED_AT" property="pwModifiedAt" />
+      <result column="JOINED_AT" property="joinedAt" />  
+    </association> 
+    <association property="productDto" resultMap="ProductMap"/>
+    <collection property="touristList" ofType="TouristDto" resultMap="TouristMap"/>
+  </resultMap>
+
+  <insert id="insertReserve" parameterType="ReserveDto" useGeneratedKeys="true" keyProperty="reserveNo">
+    <selectKey order="BEFORE" keyProperty="reserveNo" resultType="int">
+      SELECT RESERVE_SEQ.NEXTVAL 
+        FROM DUAL
+    </selectKey>
+    INSERT INTO RESERVE_T (
+        RESERVE_NO
+      , RESERVE_DATE
+      , REQUEST
+      , AGREE
+      , PICKUP_LOC
+      , RESERVE_START
+      , RESERVE_PERSON
+      , USER_NO
+      , PRODUCT_NO
+    ) VALUES (
+        #{reserveNo}
+      , TO_DATE(TO_CHAR(SYSDATE, 'YYYYMMDD'), 'YYYYMMDD') 
+      , #{request}
+      , #{agree}
+      , #{pickupLoc}
+      , #{reserveStart}
+      , #{reservePerson}
+      , #{userDto.userNo}
+      , #{productDto.productNo}  
+    )
+  </insert>
+
+  <insert id="insertTourist" parameterType="TouristDto">
+    <selectKey order="BEFORE" keyProperty="touristNo" resultType="int">
+      SELECT TOURIST_SEQ.NEXTVAL
+        FROM DUAL
+    </selectKey>
+    INSERT INTO TOURIST_T (
+        TOURIST_NO
+      , NAME
+      , BIRTH_DATE
+      , GENDER
+      , CONTACT
+      , AGE_CASE
+      , RESERVE_NO
+    ) VALUES (
+        #{touristNo}
+      , #{name}
+      , #{birthDate}
+      , #{gender}
+      , #{contact}
+      , #{ageCase}
+      , #{reserveDto.reserveNo}
+    )
+  </insert>
+
+  
+  <select id="getReserveCount" resultType="int">
+    SELECT COUNT(*)
+      FROM RESERVE_T
+  </select>
+  
+  <select id="getReserveList" parameterType="Map" resultMap="ReserveMap">
+    SELECT A.RESERVE_NO, A.RESERVE_DATE, A.REQUEST, A.AGREE, A.PICKUP_LOC, A.RESERVE_STATUS, A.RESERVE_START, A.RESERVE_PERSON, A.USER_NO, A.PRODUCT_NO, A.TRIP_NAME, A.PRICE, A.TIMETAKEN, A.STATUS
+      FROM (SELECT ROW_NUMBER() OVER(ORDER BY RES.RESERVE_NO DESC) AS RN
+                 , RES.RESERVE_NO, RES.RESERVE_DATE, RES.REQUEST, RES.AGREE, RES.PICKUP_LOC, RES.RESERVE_STATUS, RES.RESERVE_START, RES.RESERVE_PERSON, RES.USER_NO
+                 , P.PRODUCT_NO, P.TRIP_NAME, P.PRICE, P.TIMETAKEN, P.STATUS
+              FROM PRODUCT_T P INNER JOIN RESERVE_T RES
+                ON P.PRODUCT_NO = RES.PRODUCT_NO) A
+     <where>
+       <if test="begin != null">A.RN BETWEEN #{begin} AND #{end}</if>
+       <if test="userNo != null">AND A.USER_NO = #{userNo}</if> 
+     </where>
+     <!-- WHERE A.RN BETWEEN #{begin} AND #{end} -->
+  </select> 
+  
+  <select id="getReserve" parameterType="int"  resultMap="ReserveMap">
+    SELECT RES.RESERVE_NO, RES.RESERVE_DATE, RES.REQUEST, RES.AGREE, RES.PICKUP_LOC, RES.RESERVE_STATUS, RES.RESERVE_START, RES.RESERVE_PERSON
+         , U.USER_NO, U.EMAIL, U.MOBILE, U.AUTH
+         , P.PRODUCT_NO, P.TRIP_NAME, P.TIMETAKEN, P.PRICE, P.PEOPLE, P.DANGER
+      FROM USER_T U INNER JOIN RESERVE_T RES
+        ON U.USER_NO = RES.USER_NO INNER JOIN PRODUCT_T P
+        ON P.PRODUCT_NO = RES.PRODUCT_NO 
+    <where>
+      <if test="reserveNo != null">RES.RESERVE_NO = #{reserveNo}</if>
+    </where>   
+  </select>
+
+  <select id="getTourists" parameterType="int" resultMap="TouristMap">
+    SELECT T.TOURIST_NO, T.NAME, T.BIRTH_DATE, T.GENDER, T.CONTACT, T.AGE_CASE, T.RESERVE_NO, RES.PICKUP_LOC, RES.RESERVE_START, RES.PRODUCT_NO
+      FROM TOURIST_T T INNER JOIN RESERVE_T RES
+        ON T.RESERVE_NO = RES.RESERVE_NO
+     WHERE RES.RESERVE_NO = #{reserveNo}
+  </select>
+  
+  <delete id="deleteReserve" parameterType="int">
+    DELETE 
+      FROM RESERVE_T
+     WHERE RESERVE_NO = #{reserveNo}
+  </delete>
+  
+  <update id="updateReserve" parameterType="ReserveDto">
+    UPDATE RESERVE_T
+       SET REQUEST = #{request}
+         , PICKUP_LOC = #{pickupLoc}
+     WHERE RESERVE_NO = #{reserveNo}
+  </update>
+  
+  
+  
+</mapper>

@@ -1,0 +1,90 @@
+@charset "UTF-8";
+
+@import url('https://fonts.googleapis.com/earlyaccess/nanummyeongjo.css');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css');
+
+
+
+
+
+.ad_wrapper {
+	display: flex;
+	justify-content: center;
+	border-bottom: 1px gray solid;
+	height: 597px;
+	width: auto; 
+}
+
+.ad {
+	border: 1px gray solid;
+	height: 560px;
+	width: 1340px;
+	justify-content: center;
+}
+
+.owl-carousel {
+                width: 1340px;
+                height: 560px;
+                margin: 0 auto;
+                
+                
+            }
+.owl_img {
+	height: 560px;
+}
+	
+.item1 {
+	background-image: url('../../resources/image/bakdo.jpg');
+	background-repeat: no-repeat;
+	background-position: center;
+}  
+.item2 {
+  background-image: url('../../resources/image/hanla.jpg');
+  background-repeat: no-repeat;
+  background-position: center;
+}     
+.item3 {
+  background-image: url('../../resources/image/seolark.jpg');
+  background-repeat: no-repeat;
+  background-position: center;
+}               
+            
+            
+
+.col-10 {
+  border-left: 1px gray solid; 
+  border-right: 1px gray solid; 
+}
+
+.best_card {
+  display: flex;
+	justify-content: center;s
+}
+.card{
+  margin: auto;
+}
+
+.best_wrapper {
+  padding-top: 40px;
+  padding-bottom: 50px;
+}
+.best {
+  text-align: left;
+  padding-left: 35px;
+  padding-bottom: 10px;
+  font-size: 35px;
+  font-style: #006400 ;
+  font-weight: 600;
+}
+
+
+
+
+
+
+
+
+
+
+
+

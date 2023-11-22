@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mountaintour.mountain.dao.MainMapper">
+
+<resultMap type="TouristDto" id="TouristMap">
+    <id column="TOURIST_NO" property="touristNo"/>
+    <result column="NAME" property="name"/> 
+    <result column="BIRTH_DATE" property="birthDate"/> 
+    <result column="GENDER" property="gender"/> 
+    <result column="CONTACT" property="contact"/> 
+    <result column="AGE_CASE" property="ageCase"/> 
+    <association property="reserveDto" resultMap="ReserveMap"/>
+  </resultMap>
+  
+<resultMap type="ReserveDto" id="ReserveMap">
+    <id column="RESERVE_NO" property="reserveNo"/>
+    <result column="RESERVE_DATE" property="reserveDate"/>
+    <result column="REQUEST" property="request"/>
+    <result column="AGREE" property="agree"/>
+    <result column="PICKUP_LOC" property="pickupLoc"/>
+    <result column="RESERVE_STATUS" property="reserveStatus"/>
+    <result column="RESERVE_START" property="reserveStart"/>
+    <result column="RESERVE_PERSON" property="reservePerson"/>
+    <association javaType="UserDto" property="userDto">
+      <id column="USER_NO" property="userNo"/>
+      <result column="EMAIL" property="email" />
+      <result column="PW" property="pw" />
+      <result column="NAME" property="name" />
+      <result column="GENDER" property="gender" />
+      <result column="MOBILE" property="mobile" />
+      <result column="POSTCODE" property="postcode" />
+      <result column="ROAD_ADDRESS" property="roadAddress" />
+      <result column="JIBUN_ADDRESS" property="jibunAddress" />
+      <result column="DETAIL_ADDRESS" property="detailAddress" />
+      <result column="AGREE" property="agree" />
+      <result column="STATE" property="state" />
+      <result column="AUTH" property="auth" />
+      <result column="PW_MODIFIED_AT" property="pwModifiedAt" />
+      <result column="JOINED_AT" property="joinedAt" />  
+    </association> 
+    <association property="productDto" resultMap="ProductMap"/>
+    <collection property="touristList" ofType="TouristDto" resultMap="TouristMap"/>
+ </resultMap>
+
+
+  
+ <select id="selectCountBest" resultType="List">
+ 	SELECT PRODUCT_NO
+    FROM (SELECT PRODUCT_NO, RANK() OVER (ORDER BY SUM(RESERVE_PERSON) DESC) AS RN
+            FROM RESERVE_T
+           GROUP BY PRODUCT_NO
+          ) 
+   WHERE RN BETWEEN 1 AND 3
+ </select> 
+ 
+ <select id="selectGetProduct" parameterType="Map" resultType="ProductDto">
+  SELECT TRIP_NAME
+  	FROM PRODUCT_T P     
+   WHERE PRODUCT_NO = #{reserve.productNo}
+ 
+ </select>
+ 
+ 
+</mapper>

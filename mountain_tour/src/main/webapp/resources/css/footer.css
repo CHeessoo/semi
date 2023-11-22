@@ -1,0 +1,24 @@
+@charset "UTF-8";
+
+@import url('https://fonts.googleapis.com/earlyaccess/nanummyeongjo.css');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css');
+
+.footer_wrap {
+	border-top: 1px gray solid;
+  display: flex;
+  justify-content: center;
+  width: auto;
+}
+.info {
+	font-family: #E2E2E2;
+	padding-top: 50px;
+	padding-bottom: 50px;
+}
+
+.info_one {
+	font-size: 13px;
+}
+
+.info_two {
+	font-weight: 700;
+}

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mountaintour.mountain.dao.ManageMapper">
+	
+  <resultMap type="ProductDto"      id="ProductMap">
+    <id        column="PRODUCT_NO"    property="productNo"/>
+    <result    column="TRIP_NAME"     property="tripName"/>
+    <result    column="TRIP_CONTENTS" property="tripContents"/>
+    <result    column="GUIDE"         property="guide"/>
+    <result    column="TIMETAKEN"     property="timetaken"/>
+    <result    column="PRICE"         property="price"/>
+    <result    column="DANGER"        property="danger"/>
+    <result    column="REGISTERED_AT" property="registeredAt"/>
+    <result    column="MODIFIED_DATE" property="modifiedDate"/>
+    <result    column="PEOPLE"        property="people"/>
+    <result    column="HIT"           property="hit"/>
+    <result    column="PLAN"          property="plan"/>
+    <result    column="TERM_USE"      property="termUse"/>
+    <association javaType="MountainDto"  property="mountainDto">
+      <id        column="MOUNTAIN_NO"    property="mountainNo"/>
+      <result    column="MOUNTAIN_NAME"  property="mountainName"/>
+      <result    column="IMPORMATION"    property="impormation" />
+      <result    column="LOCATION"       property="location" />
+    </association>
+    <association javaType="ImageDto"       property="imageDto">
+      <result    column="IMAGE_PATH"       property="imagePath" />
+      <result    column="FILESYSTEM_NAME"  property="filesystemName"/>
+      <result    column="THUMBNAIL"        property="thumbnail"/>  
+    </association>
+  </resultMap>
+  
+  <resultMap type="ReviewDto"    id="ReviewMap">
+    <id      column="REVIEW_NO"   property="reviewNo"/>
+    <result  column="CONTENTS"    property="contents"/>
+    <result  column="CREATED_AT"  property="createdAt"/>
+    <result  column="MODIFIED_AT" property="modifiedAt"/>
+    <result  column="STATUS"      property="status"/>
+    <result  column="STAR"        property="star"/>
+    <association javaType="ProductDto" property="productDto">
+    <id        column="PRODUCT_NO"    property="productNo"/>
+    <result    column="TRIP_NAME"     property="tripName"/>
+    <result    column="TRIP_CONTENTS" property="tripContents"/>
+    <result    column="GUIDE"         property="guide"/>
+    <result    column="TIMETAKEN"     property="timetaken"/>
+    <result    column="PRICE"         property="price"/>
+    <result    column="DANGER"        property="danger"/>
+    <result    column="REGISTERED_AT" property="registeredAt"/>
+    <result    column="MODIFIED_DATE" property="modifiedDate"/>
+    <result    column="PEOPLE"        property="people"/>
+    <result    column="HIT"           property="hit"/>
+    <result    column="PLAN"          property="plan"/>
+    <result    column="TERM_USE"      property="termUse"/>
+    </association>
+    <association javaType="UserDto"      property="userDto">
+      <id        column="USER_NO"        property="userNo"/>
+      <result    column="EMAIL"          property="email"/>
+      <result    column="PW"             property="pw"/>
+      <result    column="NAME"           property="name"/>
+      <result    column="GENDER"         property="gender"/>
+      <result    column="MOBILE"         property="mobile"/>
+      <result    column="POSTCODE"       property="postcode"/>
+      <result    column="ROAD_ADDRESS"   property="roadAddress"/>
+      <result    column="JIBUN_ADDRESS"  property="jibunAddress"/>
+      <result    column="DETAIL_ADDRESS" property="detailAddress"/>
+      <result    column="AGREE"          property="agree"/>
+      <result    column="STATE"          property="state"/>
+      <result    column="AUTH"           property="auth"/>
+      <result    column="PW_MODIFIED_AT" property="pwModifiedAt"/>
+      <result    column="JOINED_AT"      property="joinedAt"/>
+    </association>
+  </resultMap>
+ 
+  
+  <!-- 회원 관리 목록 -->
+  <select id="getUserCount" resultType="int">
+    SELECT COUNT(*)
+      FROM USER_T
+  </select>
+
+  <select id="getUserList" parameterType="Map" resultType="UserDto">
+    SELECT USER_NO, EMAIL, PW, NAME, GENDER, MOBILE, POSTCODE, ROAD_ADDRESS, JIBUN_ADDRESS, DETAIL_ADDRESS, AGREE, STATE, AUTH, PW_MODIFIED_AT, JOINED_AT
+      FROM (SELECT ROW_NUMBER() OVER(ORDER BY USER_NO DESC) AS RN, USER_NO, EMAIL, PW, NAME, GENDER, MOBILE, POSTCODE, ROAD_ADDRESS, JIBUN_ADDRESS, DETAIL_ADDRESS, AGREE, STATE, AUTH, PW_MODIFIED_AT, JOINED_AT
+              FROM USER_T)
+     WHERE RN BETWEEN #{begin} AND #{end}
+  </select>
+
+  <!-- 회원 검색결과 목록 -->
+  <select id="getSearchUserCount" parameterType="Map" resultType="int">
+    SELECT COUNT(*)
+      FROM USER_T
+     WHERE ${column} LIKE '%' || #{query} || '%'
+  </select>
+  <select id="getSearchUser" parameterType="Map" resultType="UserDto">
+    SELECT USER_NO, EMAIL, PW, NAME, GENDER, MOBILE, POSTCODE, ROAD_ADDRESS, JIBUN_ADDRESS, DETAIL_ADDRESS, AGREE, STATE, AUTH, PW_MODIFIED_AT, JOINED_AT
+      FROM (SELECT ROW_NUMBER() OVER(ORDER BY USER_NO DESC) AS RN, USER_NO, EMAIL, PW, NAME, GENDER, MOBILE, POSTCODE, ROAD_ADDRESS, JIBUN_ADDRESS, DETAIL_ADDRESS, AGREE, STATE, AUTH, PW_MODIFIED_AT, JOINED_AT
+              FROM USER_T
+             WHERE ${column} LIKE '%' || #{query} || '%')
+     WHERE RN BETWEEN #{begin} AND #{end}
+  </select>
+  
+  <!-- 탈퇴 회원 관리 목록 -->
+  <select id="getLeaveUserCount" resultType="int">
+    SELECT COUNT(*)
+      FROM LEAVE_USER_T
+  </select>
+  <select id="getLeaveUserList" parameterType="Map" resultType="LeaveUserDto">
+    SELECT EMAIL, JOINED_AT, LEAVED_AT
+      FROM (SELECT ROW_NUMBER() OVER(ORDER BY LEAVED_AT DESC) AS RN, EMAIL, JOINED_AT, LEAVED_AT
+              FROM LEAVE_USER_T)
+     WHERE RN BETWEEN #{begin} AND #{end}
+  </select>
+  
+  <!-- 탈퇴 회원 검색 목록 -->
+  <select id="getSearchLeaveCount" parameterType="Map" resultType="int">
+    SELECT COUNT(*)
+      FROM LEAVE_USER_T
+     WHERE ${column} LIKE '%' || #{query} || '%'
+  </select>
+  <select id="getSearchLeaveLise" parameterType="Map" resultType="LeaveUserDto">
+    SELECT EMAIL, JOINED_AT, LEAVED_AT
+      FROM (SELECT ROW_NUMBER() OVER(ORDER BY LEAVED_AT DESC) AS RN, EMAIL, JOINED_AT, LEAVED_AT
+              FROM LEAVE_USER_T
+             WHERE ${column} LIKE '%' || #{query} || '%')
+     WHERE RN BETWEEN #{begin} AND #{end}
+  </select>
+  
+  <!-- 여행상품 검색 목록 -->
+  <select id="getSearchProductCount" parameterType="Map" resultType="int">
+    SELECT COUNT(*)
+      FROM PRODUCT_T
+     WHERE ${column} LIKE '%' || #{query} || '%'
+  </select>
+  <select id="getSearchProductList" parameterType="Map" resultType="ProductDto">
+    SELECT PRODUCT_NO, USER_NO, MOUNTAIN_NO, TRIP_NAME, TRIP_CONTENTS, GUIDE, TIMETAKEN, PRICE, DANGER, REGISTERED_AT, MODIFIED_DATE, PEOPLE, HIT, PLAN, STATUS, TERM_USE
+      FROM (SELECT ROW_NUMBER() OVER(ORDER BY PRODUCT_NO DESC) AS RN, PRODUCT_NO, USER_NO, MOUNTAIN_NO, TRIP_NAME, TRIP_CONTENTS, GUIDE, TIMETAKEN, PRICE, DANGER, REGISTERED_AT, MODIFIED_DATE, PEOPLE, HIT, PLAN, STATUS, TERM_USE
+              FROM PRODUCT_T
+             WHERE ${column} LIKE '%' || #{query} || '%')
+     WHERE RN BETWEEN #{begin} AND #{end}
+  </select>
+  
+  <!-- 리뷰관리 목록 -->
+  <select id="getReviewCount" resultType="int">
+    SELECT COUNT(*)
+      FROM REVIEW_T
+  </select>
+  <select id="getReviewList" parameterType="Map" resultMap="ReviewMap">
+    SELECT A.REVIEW_NO, A.PRODUCT_NO, A.CONTENTS, A.CREATED_AT, A.MODIFIED_AT, A.STAR, A.USER_NO, A.NAME
+      FROM (SELECT ROW_NUMBER() OVER(ORDER BY REVIEW_NO DESC) AS RN, RE.REVIEW_NO, RE.PRODUCT_NO, RE.CONTENTS, RE.CREATED_AT, RE.MODIFIED_AT, RE.STAR, U.USER_NO, U.NAME
+              FROM USER_T U INNER JOIN REVIEW_T RE
+                ON U.USER_NO = RE.USER_NO) A
+     WHERE RN BETWEEN #{begin} AND #{end}
+  </select>
+  
+  <!-- 리뷰 검색 -->
+  <select id="getSearchReviewCount" parameterType="Map" resultType="int">
+    SELECT COUNT(*)
+      FROM USER_T U INNER JOIN REVIEW_T RE
+        ON U.USER_NO = RE.USER_NO
+     WHERE ${column} LIKE '%' || #{query} || '%'
+  </select>
+  <select id="getSearchReviewList" parameterType="Map" resultMap="ReviewMap">
+     SELECT A.REVIEW_NO, A.PRODUCT_NO, A.CONTENTS, A.CREATED_AT, A.MODIFIED_AT, A.STAR, A.USER_NO, A.NAME
+       FROM (SELECT ROW_NUMBER() OVER(ORDER BY REVIEW_NO DESC) AS RN, RE.REVIEW_NO, RE.PRODUCT_NO, RE.CONTENTS, RE.CREATED_AT, RE.MODIFIED_AT, RE.STAR, U.USER_NO, U.NAME
+              FROM USER_T U INNER JOIN REVIEW_T RE
+                ON U.USER_NO = RE.USER_NO
+             WHERE ${column} LIKE '%' || #{query} || '%') A
+      WHERE RN BETWEEN #{begin} AND #{end}
+  </select>
+  
+  <!-- 리뷰 삭제 -->
+  <delete id="deleteReview" parameterType="int" >
+    DELETE
+      FROM REVIEW_T
+     WHERE REVIEW_NO = #{reviewNo}
+  </delete>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+</mapper>

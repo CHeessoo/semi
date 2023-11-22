@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+ <mapper namespace="com.mountaintour.mountain.dao.ProductMapper">
+  
+  <resultMap type="ProductDto"        id="ProductMap">
+    <id      column="PRODUCT_NO"      property="productNo"/>
+    <result  column="TRIP_NAME"   	  property="tripName"/>
+    <result  column="TRIP_CONTENTS"   property="tripContents"/>
+    <result  column="GUIDE" 		  property="guide"/>
+    <result  column="TIMETAKEN" 	  property="timetaken"/>
+    <result  column="PRICE" 		  property="price"/>
+    <result  column="DANGER"		  property="danger"/>
+    <result  column="REGISTERED_AT"   property="registeredAt"/>
+    <result  column="MODIFIED_DATE"   property="modifiedDate"/>
+    <result  column="PEOPLE" 		  property="people"/>
+    <result  column="HIT" 		  	  property="hit"/>
+    <result  column="PLAN" 		      property="plan"/>
+    <result  column="TERM_USE"		  property="termUse"/>
+    <association javaType="MountainDto"      property="mountainDto">
+      <id 	  	 column="MOUNTAIN_NO"      	 property="mountainNo"/>
+      <result    column="MOUNTAIN_NAME"      property="mountainName"/>
+      <result    column="IMPORMATION"        property="impormation" />
+      <result    column="LOCATION"           property="location" />
+    </association>
+    <association javaType="ImageDto"         property="imageDto">
+        <result  column="IMAGE_PATH" 		 property="imagePath" />
+        <result  column="FILESYSTEM_NAME" 	 property="filesystemName"/>
+        <result  column="THUMBNAIL" 		 property="thumbnail"/>  
+    </association>
+    <association javaType="UserDto" property="userDto">
+        <id column="USER_NO" property="userNo"/>
+        <result column="EMAIL" property="email"/>
+        <result column="PW" property="pw"/>
+        <result column="NAME" property="name"/>
+        <result column="GENDER" property="gender"/>
+        <result column="MOBILE" property="mobile"/>
+        <result column="POSTCODE" property="postcode"/>
+        <result column="ROAD_ADDRESS" property="roadAddress"/>
+        <result column="JIBUN_ADDRESS" property="jibunAddress"/>
+        <result column="DETAIL_ADDRESS" property="detailAddress"/>
+        <result column="AGREE" property="agree"/>
+        <result column="STATE" property="state"/>
+        <result column="AUTH" property="auth"/>
+        <result column="PW_MODIFIED_AT" property="pwModifiedAt"/>
+        <result column="JOINED_AT" property="joinedAt"/>
+    </association>
+  </resultMap>
+
+	<resultMap type="ReviewDto" id="ReviewMap">
+    <id column="REVIEW_NO" property="reviewNo"/>
+  <!-- <result column="RESERVE_NO" property="reserveNo"/>  --> 
+    <result column="CONTENTS" property="contents"/>
+    <result column="CREATED_AT" property="createdAt"/>
+    <result column="MODIFIED_AT" property="modifiedAt"/>
+    <result column="STATUS" property="status"/>
+    <result column="STAR" property="star"/>   
+    <association javaType="UserDto" property="userDto">
+        <id column="USER_NO" property="userNo"/>
+        <result column="EMAIL" property="email" />
+        <result column="PW" property="pw" />
+        <result column="NAME" property="name" />
+        <result column="GENDER" property="gender" />
+        <result column="MOBILE" property="mobile" />
+        <result column="POSTCODE" property="postcode" />
+        <result column="ROAD_ADDRESS" property="roadAddress" />
+        <result column="JIBUN_ADDRESS" property="jibunAddress" />
+        <result column="DETAIL_ADDRESS" property="detailAddress" />
+        <result column="AGREE" property="agree" />
+        <result column="STATE" property="state" />
+        <result column="AUTH" property="auth" />
+        <result column="PW_MODIFIED_AT" property="pwModifiedAt" />
+        <result column="JOINED_AT" property="joinedAt" />
+    </association>
+    <association javaType="ProductDto" property="productDto">
+       <id      column="PRODUCT_NO"      property="productNo"/>
+	   <result  column="TRIP_NAME"   	  property="tripName"/>
+	   <result  column="TRIP_CONTENTS"   property="tripContents"/>
+	   <result  column="GUIDE" 		  property="guide"/>
+	   <result  column="TIMETAKEN" 	  property="timetaken"/>
+	   <result  column="PRICE" 		  property="price"/>
+	   <result  column="DANGER"		  property="danger"/>
+	   <result  column="REGISTERED_AT"   property="registeredAt"/>
+	   <result  column="MODIFIED_DATE"   property="modifiedDate"/>
+	   <result  column="PEOPLE" 		  property="people"/>
+	   <result  column="HIT" 		  	  property="hit"/>
+	   <result  column="PLAN" 		      property="plan"/>
+	   <result  column="TERM_USE"		  property="termUse"/>
+    </association>
+	</resultMap>
+	
+
+  <insert id="insertProduct" parameterType="ProductDto">
+    <selectKey order="BEFORE" keyProperty="productNo" resultType="int">
+        SELECT PRODUCT_SEQ.NEXTVAL 
+          FROM DUAL
+    </selectKey>
+    INSERT INTO PRODUCT_T (
+        PRODUCT_NO, 
+        USER_NO, 
+        MOUNTAIN_NO, 
+        TRIP_NAME, 
+        TRIP_CONTENTS, 
+        GUIDE, 
+        TIMETAKEN,
+        PRICE, 
+        DANGER, 
+        REGISTERED_AT, 
+        MODIFIED_DATE,    
+        PLAN, 
+        TERM_USE
+    ) VALUES (
+        #{productNo}, 
+        #{userDto.userNo}, 
+        #{mountainDto.mountainNo}, 
+        #{tripName}, 
+        #{tripContents},
+        #{guide}, 
+        #{timetaken},
+        #{price}, 
+        #{danger}, 
+        SYSDATE,
+        SYSDATE,   
+        #{plan},  
+        #{termUse}
+    )
+</insert>                                                                                                            
+
+  <insert id="insertThumbnail" parameterType="ImageDto">
+    INSERT INTO IMAGE_T (
+        IMAGE_PATH
+      , FILESYSTEM_NAME
+      , THUMBNAIL
+      , PRODUCT_NO
+    ) VALUES (
+        #{imagePath}
+      , #{filesystemName}
+      , #{thumbnail}
+      , #{productNo}
+    )
+  </insert>
+
+
+  <insert id="insertProductImage" parameterType="ImageDto">
+    INSERT INTO IMAGE_T (
+        IMAGE_PATH
+      , FILESYSTEM_NAME
+      , PRODUCT_NO
+    ) VALUES (
+        #{imagePath}
+      , #{filesystemName}
+      , #{productNo}
+    )
+  </insert>
+  
+  <select id="getProductImageInYesterday" resultType="ImageDto">
+    SELECT IMAGE_PATH
+      	 , FILESYSTEM_NAME
+     	 , PRODUCT_NO
+      FROM IMAGE_T
+     WHERE IMAGE_PATH = '/product/' || TO_CHAR(SYSDATE - 1, 'YYYY/MM/DD')
+  </select>
+  
+  <select id="getProductCount" resultType="int">
+    SELECT COUNT(*)
+      FROM PRODUCT_T
+  </select>
+  
+  <select id="getProductList" parameterType="Map" resultMap="ProductMap">
+   SELECT
+        PRODUCT_NO,
+        USER_NO,
+        MOUNTAIN_NO,
+        TRIP_NAME,
+        TRIP_CONTENTS,
+        GUIDE,
+        TIMETAKEN,
+        PRICE,
+        DANGER,
+        REGISTERED_AT,
+        MODIFIED_DATE,
+        PEOPLE,
+        HIT,
+        PLAN,
+        STATUS,
+        TERM_USE,
+        MOUNTAIN_NAME,
+        IMPORMATION,
+        LOCATION,
+        IMAGE_PATH,
+        FILESYSTEM_NAME,
+        THUMBNAIL
+    FROM (SELECT ROW_NUMBER() OVER(ORDER BY P.PRODUCT_NO DESC) AS RN, 
+            P.PRODUCT_NO,
+            P.USER_NO,
+            M.MOUNTAIN_NO,
+            P.TRIP_NAME,
+            P.TRIP_CONTENTS,
+            P.GUIDE,
+            P.TIMETAKEN,
+            P.PRICE,
+            P.DANGER,
+            P.REGISTERED_AT,
+            P.MODIFIED_DATE,
+            P.PEOPLE,
+            P.HIT,
+            P.PLAN,
+            P.STATUS,
+            P.TERM_USE,
+            M.MOUNTAIN_NAME,
+            M.IMPORMATION,
+            M.LOCATION,
+            I.IMAGE_PATH,
+            I.FILESYSTEM_NAME,
+            I.THUMBNAIL 
+            FROM PRODUCT_T P JOIN MOUNTAIN_T M ON P.MOUNTAIN_NO = M.MOUNTAIN_NO
+            LEFT JOIN IMAGE_T I ON P.PRODUCT_NO = I.PRODUCT_NO)
+            WHERE RN BETWEEN #{begin} AND #{end}
+</select>
+
+  
+  <select id="getProduct" parameterType="int" resultMap="ProductMap">
+    SELECT P.PRODUCT_NO, P.TRIP_NAME, P.TRIP_CONTENTS, P.GUIDE, P.TIMETAKEN, P.PRICE, P.DANGER, P.REGISTERED_AT, P.MODIFIED_DATE
+    , P.PEOPLE, P.HIT, P.PLAN, P.STATUS, P.TERM_USE, M.MOUNTAIN_NO, M.MOUNTAIN_NAME, M.IMPORMATION, M.LOCATION
+      FROM PRODUCT_T P, MOUNTAIN_T M
+     WHERE P.MOUNTAIN_NO = M.MOUNTAIN_NO
+       AND P.PRODUCT_NO = #{productNo}
+  </select>  
+  
+  <update id="productHit" parameterType="int">
+    UPDATE PRODUCT_T
+       SET HIT = HIT + 1
+     WHERE PRODUCT_NO = #{productNo}  
+  </update>
+  
+  <insert id="heartProduct" parameterType="HeartDto">
+    INSERT INTO HEART_T (
+      PRODUCT_NO	
+    , USER_NO
+    )VALUES(
+      #{productDto.productNo}
+    , #{userNo}
+     )
+  </insert>
+  
+  <select id="getcalendar" resultType="map">      
+        SELECT 
+            P.PRODUCT_NO,
+            P.TRIP_NAME,
+            P.PEOPLE - NVL(SUM(R.RESERVE_PERSON), 0) AS CH
+        FROM 
+            PRODUCT_T P
+        LEFT JOIN 
+            RESERVE_T R ON P.PRODUCT_NO = R.PRODUCT_NO
+        GROUP BY 
+            P.PRODUCT_NO, P.TRIP_NAME, P.PEOPLE
+   </select>
+  
+  
+  <update id="updateProduct" parameterType="ProductDto">
+    UPDATE PRODUCT_T
+       SET TRIP_NAME = #{tripName}
+         , TRIP_CONTENTS = #{tripContents}
+         , GUIDE = #{guide} 
+         , TIMETAKEN = #{timetaken}
+         , PRICE = #{price}
+         , DANGER = #{danger} 
+         , REGISTERED_AT = SYSDATE
+         , MODIFIED_DATE = SYSDATE
+         , PLAN = #{plan} 
+         , STATUS = #{status}
+         , TERM_USE = #{termUse}
+     WHERE PRODUCT_NO = #{productNo}  
+  </update>
+  
+  <select id="getProductImageList" parameterType="int" resultType="ImageDto">
+    SELECT PRODUCT_NO, IMAGE_PATH, FILESYSTEM_NAME
+      FROM IMAGE_T
+     WHERE PRODUCT_NO = #{productNo}  
+  </select>
+
+	<insert id="insertReview" parameterType="ReviewDto">
+    INSERT INTO REVIEW_T (
+        REVIEW_NO
+      , PRODUCT_NO
+      <!--  , RESERVE_NO -->
+      , USER_NO
+      , CONTENTS
+      , CREATED_AT
+      , MODIFIED_AT
+      , STATUS
+      , STAR
+    ) VALUES (
+        REVIEW_SEQ.NEXTVAL
+      , #{productDto.productNo}
+    <!-- , #{reserveNo} -->  
+      , #{userDto.userNo}
+      , #{contents}
+      , SYSDATE
+      , SYSDATE
+      , 1
+      , 0
+    )
+  </insert>
+  
+  <select id="getReviewCount" parameterType="int" resultType="int">
+    SELECT COUNT(*)
+      FROM REVIEW_T
+     WHERE PRODUCT_NO = #{productNo}
+  </select>
+
+  <select id="getReviewList" parameterType="Map" resultMap="ReviewMap">
+    SELECT A.REVIEW_NO, A.PRODUCT_NO, A.USER_NO, A.CONTENTS, A.CREATED_AT, A.STATUS, A.NAME
+      FROM (SELECT ROW_NUMBER() OVER(ORDER BY REVIEW_NO DESC) AS RN, C.REVIEW_NO, C.CONTENTS, C.PRODUCT_NO, C.CREATED_AT, C.STATUS, U.USER_NO, U.NAME
+              FROM USER_T U INNER JOIN REVIEW_T C
+                ON U.USER_NO = C.USER_NO
+             WHERE C.PRODUCT_NO = #{productNo}) A
+     WHERE A.RN BETWEEN #{begin} AND #{end}
+  </select>
+
+  <select id="getHitList" parameterType="Map" resultType="productDto">
+    SELECT PRODUCT_NO, TRIP_NAME, PLAN, HIT 
+    FROM PRODUCT_T
+    ORDER BY HIT DESC
+  </select>
+
+  <select id="getProductReviewList" parameterType="Map" resultMap="ReviewMap">
+    SELECT
+    P.PRODUCT_NO,
+    P.TRIP_NAME,
+    P.PLAN
+      FROM
+		PRODUCT_T P
+      JOIN
+		REVIEW_T R ON P.PRODUCT_NO = R.PRODUCT_NO
+     GROUP BY
+	    P.PRODUCT_NO, P.TRIP_NAME, P.PLAN
+     ORDER BY
+	    COUNT(R.REVIEW_NO) DESC
+
+  </select>
+  
+
+  <delete id="deleteProductImage" parameterType="String">
+    DELETE
+      FROM IMAGE_T
+     WHERE FILESYSTEM_NAME = #{filesystemName}
+  </delete>
+
+  <delete id="deleteProductImageList" parameterType="int">
+    DELETE
+      FROM IMAGE_T
+     WHERE PRODUCT_NO = #{productNo}
+  </delete>
+  
+  <delete id="deleteProduct" parameterType="int">
+     DELETE 
+       FROM PRODUCT_T 
+      WHERE PRODUCT_NO = #{productNo}
+  </delete>
+  
+  <delete id="deleteReview" parameterType="int">
+	 DELETE 
+	   FROM REVIEW_T
+	  WHERE REVIEW_NO = #{reviewNo}
+  </delete>
+  
+</mapper>

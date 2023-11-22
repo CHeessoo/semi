@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mountaintour.mountain.dao.InquiryMapper">
+
+  <resultMap type="InquiryDto"         id="InquiryMap">
+    <id      column="INQUIRY_NO"       property="inquiryNo" />
+    <result  column="INQUIRY_TITLE"    property="inquiryTitle"/>
+    <result  column="INQUIRY_CONTENTS" property="inquiryContents"/>
+    <result  column="IP"               property="ip"/>
+    <result  column="CREATED_AT"       property="createdAt"/>
+    <result  column="ANSWER_NO"        property="answerNo"/>
+    <association javaType="UserDto"      property="userDto">
+      <id        column="USER_NO"        property="userNo" />
+      <result    column="EMAIL"          property="email"/>
+      <result    column="PW"             property="pw"/>
+      <result    column="NAME"           property="name"/>
+      <result    column="GENDER"         property="gender"/>
+      <result    column="MOBILE"         property="mobile"/>
+      <result    column="POSTCODE"       property="postcode"/>
+      <result    column="ROAD_ADDRESS"   property="roadAddress"/>
+      <result    column="JIBUN_ADDRESS"  property="jibunAddress"/>
+      <result    column="DETAIL_ADDRESS" property="detailAddress"/>
+      <result    column="AGREE"          property="agree"/>
+      <result    column="STATE"          property="state"/>
+      <result    column="AUTH"           property="auth"/>
+      <result    column="PW_MODIFIED_AT" property="pwModifiedAt"/>
+      <result    column="JOINED_AT"      property="joinedAt"/>
+    </association>
+    <association javaType="ProductDto"  property="productDto">
+      <id        column="PRODUCT_NO"    property="productNo" />
+      <result    column="MOUNTAIN_NO"   property="mountainNo"/>
+      <result    column="TRIP_NAME"     property="tripName"/>
+      <result    column="TRIP_CONTENTS" property="tripContents"/>
+      <result    column="GUIDE"         property="guide"/>
+      <result    column="TIMETAKEN"     property="timetaken"/>
+      <result    column="PRIZE"         property="prize"/>
+      <result    column="DANGER"        property="danger"/>
+      <result    column="REGISTERED_AT" property="registeredAt"/>
+      <result    column="MODIFIED_DATE" property="modifiedDate"/>
+      <result    column="PEOPLE"        property="people"/>
+      <result    column="PLAN"          property="plan"/>
+      <result    column="STATUS"        property="status"/>
+    </association>
+  </resultMap>
+
+  <!-- 전체 목록 -->
+  <select id="getInquiryCount" resultType="int">
+    SELECT COUNT(*)
+      FROM INQUIRY_T
+  </select>
+  <select id="getInquiryList" parameterType="Map" resultMap="InquiryMap">
+    SELECT A.INQUIRY_NO, A.USER_NO, A.NAME, A.EMAIL, A.AUTH, A.PRODUCT_NO, A.INQUIRY_TITLE, A.INQUIRY_CONTENTS, A.IP, A.CREATED_AT, A.ANSWER_NO
+      FROM (SELECT ROW_NUMBER() OVER(ORDER BY INQ.INQUIRY_NO DESC) AS RN, INQ.INQUIRY_NO, INQ.INQUIRY_TITLE, INQ.INQUIRY_CONTENTS, INQ.IP, INQ.CREATED_AT, U.USER_NO, U.NAME, U.AUTH, U.EMAIL, INQ.PRODUCT_NO, ANS.ANSWER_NO
+              FROM USER_T U RIGHT OUTER JOIN INQUIRY_T INQ 
+                ON U.USER_NO = INQ.USER_NO LEFT OUTER JOIN INQUIRY_ANSWER_T ANS
+                ON INQ.INQUIRY_NO = ANS.INQUIRY_NO) A
+     WHERE A.RN BETWEEN #{begin} AND #{end}
+  </select>
+  
+  
+  <!-- 검색 결과 목록 -->
+  <select id="getSearchCount" parameterType="Map" resultType="int">
+    SELECT COUNT(*)
+      FROM USER_T U LEFT OUTER JOIN INQUIRY_T INQ
+        ON INQ.USER_NO = U.USER_NO
+     WHERE ${column} LIKE '%' || #{query} || '%'
+  </select>
+  <select id="getSearchInquiry" parameterType="Map" resultMap="InquiryMap">
+    SELECT A.INQUIRY_NO, A.PRODUCT_NO, A.INQUIRY_TITLE, A.INQUIRY_CONTENTS, A.IP, A.CREATED_AT, A.USER_NO, A.NAME
+      FROM (SELECT ROW_NUMBER() OVER(ORDER BY INQUIRY_NO DESC) AS RN, INQ.INQUIRY_NO, INQ.PRODUCT_NO, INQ.INQUIRY_TITLE, INQ.INQUIRY_CONTENTS, INQ.IP, INQ.CREATED_AT, U.USER_NO, U.NAME
+              FROM USER_T U INNER JOIN INQUIRY_T INQ
+                ON INQ.USER_NO = U.USER_NO
+             WHERE ${column} LIKE '%' || #{query} || '%') A
+     WHERE A.RN BETWEEN #{begin} AND #{end}
+  </select>
+  
+  
+  <!-- 상세 페이지 -->
+  <select id="getInquiry" parameterType="int" resultMap="InquiryMap">
+    SELECT INQ.INQUIRY_NO, INQ.INQUIRY_TITLE, INQ.INQUIRY_CONTENTS, INQ.IP, INQ.CREATED_AT
+         , U.USER_NO, U.NAME, U.AUTH
+         , PR.PRODUCT_NO, PR.TRIP_NAME
+      FROM INQUIRY_T INQ RIGHT OUTER JOIN USER_T U
+        ON U.USER_NO = INQ.USER_NO LEFT OUTER JOIN PRODUCT_T PR
+        ON PR.PRODUCT_NO = INQ.PRODUCT_NO
+     WHERE INQ.INQUIRY_NO = #{inquiryNo}
+  </select>
+  
+  <!-- 문의글 등록 -->
+  <insert id="insertInquiry" parameterType="InquiryDto">
+    INSERT INTO INQUIRY_T (
+        INQUIRY_NO
+      , USER_NO
+      , PRODUCT_NO
+      , INQUIRY_TITLE
+      , INQUIRY_CONTENTS
+      , IP
+      , CREATED_AT
+    ) VALUES (
+        INQUIRY_SEQ.NEXTVAL
+      , #{userDto.userNo}
+      , #{productDto.productNo, jdbcType=INTEGER}
+      , #{inquiryTitle}
+      , #{inquiryContents}
+      , #{ip}
+      , SYSDATE
+    )
+  </insert>
+  <!-- 문의글에 여행상품 목록 나타내기 -->
+  <select id="getProductList" resultType="ProductDto">
+    SELECT ROW_NUMBER() OVER(ORDER BY PRODUCT_NO DESC) AS RN, PRODUCT_NO, USER_NO, MOUNTAIN_NO, TRIP_NAME, TRIP_CONTENTS, GUIDE, TIMETAKEN, PRICE, DANGER, REGISTERED_AT, MODIFIED_DATE, PEOPLE, HIT, PLAN, STATUS, TERM_USE
+      FROM PRODUCT_T
+  </select>
+  
+  <!-- 문의글 삭제 -->
+  <delete id="deleteInquiry" parameterType="int">
+    DELETE 
+      FROM INQUIRY_T
+     WHERE INQUIRY_NO = #{inquiryNo}
+  </delete>
+  
+
+	 
+
+</mapper>
